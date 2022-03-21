@@ -5,16 +5,12 @@ import csv
 import sqlite3
 import json
 
-###### KAROL SIKORSKI PROFIL SOFTWARE BACKEND
-
-
 class API_CONNECTOR:
     def __init__(self,response:str) -> None:
         self.response = response
 
 
     def SQL_OUTPUT(self,divisions):
-        #print(divisions.values())
         connection = sqlite3.connect("nba.db")
         cursor = connection.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS nba (won_games_as_home_team text,won_games_as_visitor_team text,lost_games_as_home_team text,lost_games_as_visitor_team text)")
@@ -31,13 +27,12 @@ class API_CONNECTOR:
             writer = csv.writer(csv_file)
             for key, value in teams_dic.items():
                 writer.writerow([key, ','.join(value)])
-        csv_file.close()        
-    
-
+                
+                
     def JSON_OUTPUT(self,teams_dic): ## wyjscie do pliku JSON
         with open("nba.json","w") as json_file:
             json.dump(teams_dic,json_file,indent=4)
-        json_file.close()    
+         
 
     def STD_OUT(self,teams): ## wyjscie do konsoli
         for key,values in teams.items():
