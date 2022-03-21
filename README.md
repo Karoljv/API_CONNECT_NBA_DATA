@@ -46,7 +46,9 @@ sqlite - zapisywanie danych do sqlite database
 stdout - wyswietlanie standardowego wyjscia do konsoli (bez zapiswania wynikow)
       
 Przykładowy json dla parametorw season = 2018 
+        
 python <nazwa_skryptu.py> teams-stats --season 2018 --output json
+        
 {
     "Denver Nuggets": [
         "won games as home team: 3",
