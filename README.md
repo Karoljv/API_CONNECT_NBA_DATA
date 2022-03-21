@@ -7,6 +7,7 @@ Wyświetlanie pogrupowanych zespołów według dywyzji:
 
 python <nazwa_skryptu.py> grouped-teams
 Ex:
+
 Southeast
     Atlanta Hawks (ATL)
     Charlotte Hornets (CHA)
@@ -21,7 +22,9 @@ Wyświetlanie najcięższego oraz najwyższego zawodnika według podanego imieni
 --name parameter
 
 python <nazwa_skryptu.py> players-stats --name <imie_zawodnika lub nazwisko_zawodnika>
+        
 Ex:
+        
 python API_connect.py players-stats --name Harden
       The tallest player: James Harden 1.96 meters
       The heaviest player:  James Harden 99 kilograms
