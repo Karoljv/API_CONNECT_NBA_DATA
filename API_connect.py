@@ -5,12 +5,14 @@ import csv
 import sqlite3
 import json
 
-class API_CONNECTOR:
+
+
+class ApiConnect:
     def __init__(self,response:str) -> None:
         self.response = response
 
 
-    def SQL_OUTPUT(self,divisions):
+    def sql_output(self,divisions):
         connection = sqlite3.connect("nba.db")
         cursor = connection.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS nba (won_games_as_home_team text,won_games_as_visitor_team text,lost_games_as_home_team text,lost_games_as_visitor_team text)")
@@ -22,19 +24,20 @@ class API_CONNECTOR:
         connection.close()
 
 
-    def CSV_OUTPUT(self,teams_dic): ## wyjscie do pliku CSV
+    def csv_output(self,teams_dic): ## wyjscie do pliku CSV
         with open("nba.csv", 'w') as csv_file:
             writer = csv.writer(csv_file)
             for key, value in teams_dic.items():
                 writer.writerow([key, ','.join(value)])
-                
-                
-    def JSON_OUTPUT(self,teams_dic): ## wyjscie do pliku JSON
+               
+    
+
+    def json_output(self,teams_dic): ## wyjscie do pliku JSON
         with open("nba.json","w") as json_file:
             json.dump(teams_dic,json_file,indent=4)
-         
+            
 
-    def STD_OUT(self,teams): ## wyjscie do konsoli
+    def std_out(self,teams): ## wyjscie do konsoli
         for key,values in teams.items():
             print(key)
             for v in values:
@@ -42,25 +45,23 @@ class API_CONNECTOR:
 
     
     def show_grouped_teams(self): ## Wyswietlanie zespolow wedlug dywyzji
-        data = self.response.json()
-        divisions = ("Northwest","Southwest","Pacific","Atlantic","Central","Southeast") ## Tuple z nazwami dywyzji
 
+        divisions = ("Northwest","Southwest","Pacific","Atlantic","Central","Southeast") ## Tuple z nazwami dywyzji
         for div in divisions:
             print(div)
-            for teams in data['data']:
+            for teams in self.response.json()['data']:
                 if teams['division'] == div:
                     print(f"    {teams['full_name']} ({teams['abbreviation']})")## wyswietlanie nazwy zespou i abbrew
         
       
 
     def show_players_stats(self):       ## zwraca najciezszego i najwyzszego wedlug jego first name 
-        data = self.response.json()
         lista_wzrostu = [] #lista wzrostu z ktorego bedzie wybierany najwiekszy element
         lista_wag = [] #lista wag z ktorego bedzie wybierany najwiekszy element
         dic = {}
-        for players in data['data']:
+        for players in self.response.json()['data']:
                 if players["height_inches"] != None: ## wykluczenie zawodnikow z None w danych
-                    dic[players["first_name"] + " " + players["last_name"]] = [(players['height_feet']*30.48)+(players['height_inches']*2.54),round(players['weight_pounds']*0.45)] ## tworzenie slownika
+                    dic[players["first_name"] + " " + players["last_name"]] = [(players['height_feet']*30.48)+(players['height_inches']*2.54),round(players['weight_pounds']*0.45,2)] ## tworzenie slownika
         # z lista zawierajaca wzrost oraz wage, gdzie key to imie i nazwisko zawodnika a value to lista zawierajaca wzrost i wage
 
         for values in dic.values():
@@ -85,7 +86,6 @@ class API_CONNECTOR:
 
 
     def show_teams_stats(self):
-        data = self.response.json()
         teams = {'Denver Nuggets':[], 'Minnesota Timberwolves':[], 'Oklahoma City Thunder':[], 'Portland Trail Blazers':[], 'Utah Jazz':[], 
         'Dallas Mavericks':[], 'Houston Rockets':[], 'Memphis Grizzlies':[], 'New Orleans Pelicans':[], 'San Antonio Spurs':[],
         'Golden State Warriors':[], 'LA Clippers':[], 'Los Angeles Lakers':[], 'Phoenix Suns':[], 'Sacramento Kings':[],
@@ -99,7 +99,7 @@ class API_CONNECTOR:
             Won_games_as_visitor_team = 0
             Lost_games_as_home_team = 0
             Lost_games_as_visitor_team = 0
-            for games in data['data']:
+            for games in self.response.json()['data']:
                 if games['home_team']['full_name'] == team: 
                     if games['home_team_score'] > games['visitor_team_score']:
                         Won_games_as_home_team = Won_games_as_home_team + 1
@@ -122,13 +122,13 @@ class API_CONNECTOR:
         
     
         if sys.argv[5] == "sqlite":
-            self.SQL_OUTPUT(teams) 
+            self.sql_output(teams) 
         elif sys.argv[5] == "csv":
-            self.CSV_OUTPUT(teams)
+            self.csv_output(teams)
         elif sys.argv[5] == "json":
-            self.JSON_OUTPUT(teams)
+            self.json_output(teams)
         elif sys.argv[5] == "stdout":
-            self.STD_OUT(teams)
+            self.std_out(teams)
         else:
             print("Nie prawidlowe dane wejsciowe")
             
@@ -144,21 +144,21 @@ else:
         if sys.argv[1] == "grouped-teams":
             response = requests.get(f'https://www.balldontlie.io/api/v1/teams/')
             if response.status_code == 200:
-                API = API_CONNECTOR(response)
-                API.show_grouped_teams()
+                api = ApiConnect(response)
+                api.show_grouped_teams()
 
         elif sys.argv[1] == "players-stats" and sys.argv[2] == "--name": #Not all players will have height_feet, height_inches, or weight_pounds.
             response = requests.get(f'https://www.balldontlie.io/api/v1/players?search={sys.argv[3]}&per_page=100')
             if response.status_code == 200:
-                API = API_CONNECTOR(response)
-                API.show_players_stats()
+                api = ApiConnect(response)
+                api.show_players_stats()
 
 
         elif sys.argv[1] == "teams-stats" and sys.argv[2] == "--season": ## wyświetlanie statystyk zespolow wedlug podanego sezonu 
             response = requests.get(f'https://www.balldontlie.io/api/v1/games?seasons[]={sys.argv[3]}&per_page=100&page=1')
             if response.status_code == 200:
-                API = API_CONNECTOR(response)
-                API.show_teams_stats()
+                api = ApiConnect(response)
+                api.show_teams_stats()
         
             
     except IndexError:
